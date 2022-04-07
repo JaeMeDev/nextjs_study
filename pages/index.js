@@ -1,24 +1,12 @@
 import { useState, useEffect } from "react";
 import Seo from "../components/Seo";
 
-const API_KEY = "185d39589dc8bcf4f246fbe2248877ab";
-
-export default function Home() {
-  const [movies, setMovies] = useState();
-
-  useEffect(() => {
-    (async () => {
-      const { results } = await (await fetch("/api/movies")).json();
-
-      setMovies(results);
-    })();
-  }, []);
-
+export default function Home({ results }) {
   return (
     <div className="container">
       <Seo title="Home" />
-      {!movies && <h4>Loading...</h4>}
-      {movies?.map((movie) => (
+      {!results && <h4>Loading...</h4>}
+      {results?.map((movie) => (
         <div className="movie" key={movie.id}>
           <img src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`} />
           <h4>{movie.original_title}</h4>
@@ -47,4 +35,19 @@ export default function Home() {
       `}</style>
     </div>
   );
+}
+
+// 이 코드는 server 쪽에서 동작함.
+// API Key를 숨길 수 있다. 여기서 반환한 props는 _app.js의 pageProps로 간다.
+// page가 보여지기전에 데이터를 가지고 올 수 있다.
+export async function getServerSideProps() {
+  const { results } = await (
+    await fetch("http://localhost:3000/api/movies")
+  ).json();
+
+  return {
+    props: {
+      results,
+    },
+  };
 }
